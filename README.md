@@ -32,37 +32,17 @@ dependencies {
 ```
 
 ### 3. How to use
-Implement **WeatherStationRepository**, set your base url, create client and override function for your needs
+Inject **WeatherStationRepositoryFactory** to ViewModel
 ```kotlin
-internal class WeatherStationRepositoryImpl(baseUrl: String) : WeatherStationRepository  {
-
-    private val client = WeatherStationClient(baseUrl)
-    private val json = kotlinx.serialization.json.Json {
-        ignoreUnknownKeys = true
-    }
-
-    override suspend fun getMeasurement(deviceId: Int): Measurement? = try {
-        json.decodeFromString(client.getMeasurement(deviceId).body())
-    } catch (e: ResponseException) {
-        throw ResponseErrorException(code = e.response.status.value, message = e.message)
-    }
-
-    override suspend fun getDevices(): List<Device> = try {
-        json.decodeFromString(client.getDeviseList().body())
-    } catch (e: ResponseException) {
-        throw ResponseErrorException(code = e.response.status.value, message = e.message)
-    }
-
-    override suspend fun getDeviceDailyErrors(deviceId: Int): DeviceDailyErrors? = try {
-        json.decodeFromString(client.getDeviceDailyErrors(deviceId).body())
-    } catch (e: ResponseException) {
-        throw ResponseErrorException(code = e.response.status.value, message = e.message)
-    }
-
-    override suspend fun getDeviceListDailyErrors(): List<DeviceDailyErrors> = try {
-        json.decodeFromString(client.getDeviceListDailyErrors().body())
-    } catch (e: ResponseException) {
-        throw ResponseErrorException(code = e.response.status.value, message = e.message)
-    }
-}
+internal class MainViewModel @Inject constructor(
+    private val weatherRepositoryFactory: WeatherStationRepositoryFactory,
+) 
+``` 
+Initialize the variable **WeatherStationRepository**
+```kotlin
+private var _weatherRepository: WeatherStationRepository? = null
+``` 
+Use factory to create repository (set your host address)
+```kotlin
+_weatherRepository = weatherRepositoryFactory.get("http://your-host:your-port")
 ``` 
